@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>X•Y JEJAK AI V3 — SK Penderas</title>
+<style>
+:root{--navy:#123b72;--blue:#1976d2;--red:#e53935;--green:#2e7d32;--gold:#f9a825;--bg:#f4f7fb}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#17324d}.wrap{max-width:1050px;margin:auto;padding:18px}.hero{background:linear-gradient(135deg,#123b72,#1976d2);color:#fff;border-radius:22px;padding:25px;box-shadow:0 10px 30px #0002}.hero h1{margin:0;font-size:clamp(30px,5vw,50px)}.hero p{margin:6px 0}.card{background:#fff;border-radius:18px;padding:20px;margin-top:16px;box-shadow:0 5px 18px #0001}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}.mode{border:2px solid #dce7f4;border-radius:16px;padding:18px;cursor:pointer;background:#fff}.mode:hover{border-color:var(--blue);transform:translateY(-2px)}button{border:0;border-radius:12px;padding:12px 18px;font-weight:700;cursor:pointer;background:var(--blue);color:#fff}button.secondary{background:#e8eef7;color:#17324d}button.red{background:var(--red)}input{padding:12px;border:2px solid #dce7f4;border-radius:10px;width:100%;font-size:16px}.hide{display:none}.tag{display:inline-block;padding:5px 9px;border-radius:99px;background:#e8f1ff;color:#1555a0;font-size:12px;font-weight:700}.q{font-size:20px;line-height:1.5}.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:15px}.opts button{background:#fff;color:#17324d;border:2px solid #dce7f4;text-align:left}.opts button:hover{border-color:var(--blue)}.feedback{margin-top:14px;padding:14px;border-radius:12px}.ok{background:#e7f6e9;color:#1b5e20}.bad{background:#ffebee;color:#b71c1c}.progress{height:10px;background:#e1e8f0;border-radius:99px;overflow:hidden}.bar{height:100%;background:var(--blue);width:0}.stat{font-size:14px;color:#52708f}.footer{text-align:center;padding:20px;color:#6b7d90;font-size:13px}
+</style></head>
+<body><div class="wrap">
+<div class="hero"><span class="tag">MATEMATIK TAHUN 5</span><h1>X•Y JEJAK AI</h1><p>SK Penderas (JHEOA) • 28050 Kuala Krau, Pahang</p><p><b>TANDA → JEJAK X → JEJAK Y → CARI BEZA → JAWAP → SEMAK</b></p></div>
+
+<div id="home" class="card">
+<h2>🎮 Mula Permainan</h2>
+<label>Nama murid</label><input id="name" placeholder="Contoh: Ali">
+<div class="grid" style="margin-top:15px">
+<div class="mode" onclick="start('misi')"><h3>🧭 Misi Lengkap</h3><p>Latihan koordinat, jarak mengufuk, jarak mencancang dan arah.</p></div>
+<div class="mode" onclick="start('masalah')"><h3>🧩 Penyelesaian Masalah</h3><p>Fahami → Fikir cara → Selesaikan → Semak.</p></div>
+<div class="mode" onclick="start('pemulihan')"><h3>🤖 Latihan Pemulihan AI</h3><p>Latihan dipilih berdasarkan pola kesalahan jawapan.</p></div>
+</div>
+</div>
+
+<div id="game" class="card hide">
+<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b id="player"></b><div class="stat" id="mode"></div></div><div><b id="score">0</b> mata</div></div>
+<div class="progress" style="margin:12px 0"><div id="bar" class="bar"></div></div>
+<div id="question"></div><div id="feedback"></div>
+<div style="margin-top:16px"><button class="secondary" onclick="back()">← Menu</button></div>
+</div>
+
+<div id="result" class="card hide"></div>
+<div class="footer">Disediakan oleh Cikgu Ismail bin Ibrahim • X•Y JEJAK AI V3</div>
+</div>
+<script>
+const all=[
+{t:'x',q:'Titik A berada pada koordinat (4,2). Apakah jarak mengufuk titik A dari asalan?',o:['2 unit','4 unit','6 unit','8 unit'],a:1,h:'Jarak mengufuk menggunakan nilai x.',e:'X1'},
+{t:'y',q:'Titik B berada pada koordinat (3,5). Apakah jarak mencancang titik B dari asalan?',o:['3 unit','5 unit','8 unit','2 unit'],a:1,h:'Jarak mencancang menggunakan nilai y.',e:'Y1'},
+{t:'b',q:'A(4,0) ke B(6,5). Berapakah jarak mengufuk?',o:['2 unit','4 unit','5 unit','6 unit'],a:0,h:'Cari beza nilai x: 6 − 4.',e:'B1'},
+{t:'b',q:'A(4,0) ke B(6,5). Berapakah jarak mencancang?',o:['2 unit','4 unit','5 unit','6 unit'],a:2,h:'Cari beza nilai y: 5 − 0.',e:'B1'},
+{t:'a',q:'Dari (4,0) bergerak ke (6,5). Apakah arah pergerakan?',o:['2 kanan, 5 atas','2 kiri, 5 atas','5 kanan, 2 atas','5 kiri, 2 bawah'],a:0,h:'Nilai x bertambah = kanan. Nilai y bertambah = atas.',e:'A1'},
+{t:'m',q:'Koordinat M ialah (a,8). Koordinat N ialah (1,8). Jarak mengufuk ialah 2 unit. Jika M berada di kanan N, apakah nilai a?',o:['−1','2','3','4'],a:2,h:'Dari 1 bergerak 2 unit ke kanan: 1 + 2.',e:'P1'},
+{t:'m',q:'Koordinat L ialah (3,b) dan J ialah (4,9). Jarak mencancang ialah 3 unit. Jika L di bawah J, apakah nilai b?',o:['5','6','7','12'],a:1,h:'L berada 3 unit di bawah y=9: 9 − 3.',e:'P1'},
+{t:'m',q:'Ruang 1 (2,5) ke ruang 2 (6,5). Berapakah jarak mengufuk?',o:['2 unit','4 unit','5 unit','6 unit'],a:1,h:'Beza x: 6 − 2 = 4.',e:'B1'},
+{t:'m',q:'Dapur (4,0) ke bilik 2 (6,5). Apakah pergerakan yang betul?',o:['2 kiri, 5 atas','2 kanan, 5 atas','5 kanan, 2 atas','4 kanan, 5 atas'],a:1,h:'X: 4→6 ialah 2 kanan. Y: 0→5 ialah 5 atas.',e:'M1'},
+{t:'m',q:'Sebuah zoo mempunyai pintu masuk pada asalan. Burung kakak tua berada 4 unit mengufuk dari pintu masuk. Apakah koordinat yang mungkin?',o:['(4,0)','(0,4)','(4,4)','(0,0)'],a:0,h:'Mengufuk bermaksud bergerak pada paksi-x.',e:'X1'},
+{t:'m',q:'Jeti berada 5 unit mencancang dari asalan pada paksi-y. Apakah koordinatnya?',o:['(5,0)','(0,5)','(5,5)','(0,0)'],a:1,h:'Mencancang bermaksud bergerak pada paksi-y.',e:'Y1'},
+{t:'m',q:'Ali bermula di (2,3) dan berakhir di (7,3). Berapakah jarak mengufuk?',o:['3 unit','4 unit','5 unit','10 unit'],a:2,h:'Beza x: 7 − 2 = 5.',e:'B1'}
+];
+let mode='',qs=[],i=0,score=0,errors=JSON.parse(localStorage.getItem('xy_errors')||'{}');
+function start(m){let n=document.getElementById('name').value.trim()||'Murid';mode=m;score=0;i=0;qs=m==='pemulihan'?pickRecovery():shuffle(all).slice(0,8);document.getElementById('home').classList.add('hide');document.getElementById('result').classList.add('hide');document.getElementById('game').classList.remove('hide');document.getElementById('player').textContent='👤 '+n;document.getElementById('mode').textContent=m==='misi'?'Misi Lengkap':m==='masalah'?'Penyelesaian Masalah':'Latihan Pemulihan AI';show()}
+function pickRecovery(){let k=Object.keys(errors).sort((a,b)=>(errors[b]||0)-(errors[a]||0))[0];let r=k?all.filter(x=>x.e===k):all;return shuffle(r).slice(0,8)}
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function show(){if(i>=qs.length)return finish();let x=qs[i];document.getElementById('bar').style.width=(i/qs.length*100)+'%';document.getElementById('score').textContent=score;document.getElementById('question').innerHTML='<span class="tag">Soalan '+(i+1)+'/'+qs.length+'</span><div class="q"><b>'+x.q+'</b></div><div class="opts">'+x.o.map((v,j)=>'<button onclick="answer('+j+')">'+String.fromCharCode(65+j)+'. '+v+'</button>').join('')+'</div>'+(mode==='masalah'?'<p class="stat">Fahami → Fikir cara → Selesaikan → Semak</p>':'');document.getElementById('feedback').innerHTML=''}
+function answer(j){let x=qs[i],good=j===x.a;if(good){score+=10;document.getElementById('feedback').innerHTML='<div class="feedback ok">✅ Betul! '+x.h+'</div>'}else{errors[x.e]=(errors[x.e]||0)+1;localStorage.setItem('xy_errors',JSON.stringify(errors));document.getElementById('feedback').innerHTML='<div class="feedback bad">❌ Belum tepat.<br><b>AI Coach:</b> '+x.h+'</div>'}document.querySelectorAll('.opts button').forEach(b=>b.disabled=true);setTimeout(()=>{i++;show()},850)}
+function finish(){document.getElementById('bar').style.width='100%';document.getElementById('game').classList.add('hide');document.getElementById('result').classList.remove('hide');let max=qs.length*10;let top=Object.entries(errors).sort((a,b)=>b[1]-a[1]).slice(0,2).map(x=>x[0]+' ('+x[1]+' kesalahan)').join(', ')||'Tiada pola kesalahan direkodkan';document.getElementById('result').innerHTML='<h2>🏁 Misi Selesai!</h2><h1>'+score+' / '+max+' mata</h1><p><b>Pola kesalahan:</b> '+top+'</p><p>Cadangan: gunakan <b>Latihan Pemulihan AI</b> untuk latihan berdasarkan kesalahan yang direkodkan.</p><button onclick="back()">Main Semula</button>'}
+function back(){document.getElementById('game').classList.add('hide');document.getElementById('result').classList.add('hide');document.getElementById('home').classList.remove('hide')}
+</script></body></html>
