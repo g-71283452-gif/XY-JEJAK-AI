@@ -58,6 +58,7 @@ canvas{width:100%;max-width:580px;aspect-ratio:1;border:3px solid #172033;border
   </div>
   <div style="margin-top:12px">
     <label><b>Nama murid:</b> <input id="student" placeholder="Masukkan nama"></label>
+    <label style="margin-left:8px"><b>Kelas:</b> <input id="studentClass" value="Tahun 5" placeholder="Contoh: 5 Jahut" style="width:120px"></label>
     <label style="margin-left:8px"><b>Mod:</b>
       <select id="mode"><option value="full">Misi Lengkap</option><option value="problem">Penyelesaian Masalah</option><option value="remedial">Latihan Pemulihan AI</option></select>
     </label>
@@ -261,7 +262,11 @@ function draw(A,B){
 draw();stats();
 
 const DB_KEY="XYJEJAK_LEADERBOARD_V1";
+const CLASS_KEY="XYJEJAK_ACTIVE_CLASS_V1";
 const ADMIN_PIN="XY2026";
+function getActiveClass(){return (localStorage.getItem(CLASS_KEY)||"Tahun 5").trim()||"Tahun 5";}
+function setActiveClass(v){localStorage.setItem(CLASS_KEY,(v||"Tahun 5").trim()||"Tahun 5");}
+function recordClass(x){return (x&&x.className||"Tanpa Kelas").trim()||"Tanpa Kelas";}
 
 function getRecords(){
   try{return JSON.parse(localStorage.getItem(DB_KEY)||"[]")}catch(e){return[]}
@@ -278,6 +283,7 @@ function saveResult(){
   records.push({
     id:Date.now(),
     name:($("student").value||"Murid").trim(),
+    className:(($("studentClass")&&$("studentClass").value)||getActiveClass()).trim()||getActiveClass(),
     score:s.score,correct:s.correct,total:s.list.length,
     pct:Math.round(s.correct/s.list.length*100),
     attempts:s.attempts,mode:modeName(),
@@ -315,6 +321,13 @@ function renderAdmin(){
   const maxErr=Math.max(1,...Object.values(errors));
   const labels={X1:"x / mengufuk",Y1:"y / mencancang",M1:"Mula & akhir",B1:"Beza jarak",A1:"Arah",P1:"Penyelesaian masalah"};
   box.innerHTML=`
+  <div class="card" style="margin-bottom:12px">
+    <h3>🏫 Sistem Kelas — V3.5</h3>
+    <div class="adminNote">Tetapkan kelas aktif sebelum menggabungkan data murid. Data baharu akan direkod bersama nama kelas.</div>
+    <label><b>Kelas aktif:</b> <input id="activeClassInput" value="${getActiveClass()}" placeholder="Contoh: 5 Jahut"></label>
+    <button class="primary" id="saveClassBtn">💾 SIMPAN KELAS</button>
+    <span id="classSaveStatus" class="small"></span>
+  </div>
   <div class="adminGrid">
     <div class="adminStat"><b>${total}</b><br><span class="small">Percubaan direkod</span></div>
     <div class="adminStat"><b>${avg}%</b><br><span class="small">Purata pencapaian</span></div>
@@ -336,6 +349,11 @@ function renderAdmin(){
   </div>
   <p class="adminNote">Nota: Oleh sebab game ini menggunakan GitHub Pages tanpa pangkalan data, rekod leaderboard disimpan dalam <b>browser/peranti yang digunakan</b>. Untuk menggabungkan data daripada beberapa peranti, gunakan Eksport Data dan Import Data pada peranti guru.</p>`;
 }
+function bindClassSettings(){
+  const input=document.getElementById("activeClassInput"),btn=document.getElementById("saveClassBtn"),status=document.getElementById("classSaveStatus");
+  if(!input||!btn)return;
+  btn.onclick=()=>{const v=input.value.trim();if(!v){alert("Sila masukkan nama kelas.");return;}setActiveClass(v);status.textContent=" Kelas aktif: "+v;renderClassDashboard();};
+}
 function exportData(){
   const blob=new Blob([JSON.stringify(getRecords(),null,2)],{type:"application/json"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="XY-JEJAK-data-murid.json";a.click();URL.revokeObjectURL(a.href);
@@ -345,10 +363,11 @@ function importData(e){
   const rd=new FileReader();
   rd.onload=()=>{try{
     const incoming=JSON.parse(rd.result);if(!Array.isArray(incoming))throw 0;
-    const merged=[...getRecords(),...incoming];
+    const normalized=incoming.map(x=>({...x,className:recordClass(x)}));
+    const merged=[...getRecords(),...normalized];
     const unique=[...new Map(merged.map(x=>[x.id,x])).values()].sort((a,b)=>b.score-a.score);
     saveRecords(unique.slice(0,100));renderAdmin();showLeaderboard();
-    alert("Data berjaya digabungkan.");
+    alert("Data berjaya digabungkan. "+normalized.length+" rekod diproses.");
   }catch(err){alert("Fail data tidak sah.");}};
   rd.readAsText(f);
 }
@@ -421,6 +440,7 @@ function adminReset(){
   }
   renderAdmin=function(){
     oldRenderAdmin();
+    bindClassSettings();
     addProfile();
     addClassDashboard();
   };
@@ -428,8 +448,11 @@ function adminReset(){
   function renderClassDashboard(){
     const box=document.getElementById("classDashboard");
     if(!box)return;
-    const r=getRecords();
-    if(!r.length){box.innerHTML="<p class='adminNote'>Belum ada data murid pada peranti ini.</p>";return;}
+    const all=getRecords();
+    const active=getActiveClass();
+    const r=all.filter(x=>recordClass(x).toLowerCase()===active.toLowerCase());
+    if(!all.length){box.innerHTML="<p class='adminNote'>Belum ada data murid pada peranti ini.</p>";return;}
+    if(!r.length){box.innerHTML="<p class='adminNote'>Tiada rekod untuk kelas <b>${escapeHtml(active)}</b>. Pilih kelas lain atau import data murid.</p>";return;}
     const names=[...new Set(r.map(x=>(x.name||"Murid").trim()))];
     const avg=Math.round(r.reduce((a,x)=>a+x.pct,0)/r.length);
     const latestBy={};
@@ -444,6 +467,7 @@ function adminReset(){
     const max=Math.max(1,...Object.values(errors));
     const need=latest.filter(x=>x.pct<60).sort((a,b)=>a.pct-b.pct);
     box.innerHTML=`
+      <div class="card" style="padding:10px;margin-bottom:10px"><b>🏫 Kelas: ${escapeHtml(active)}</b> — ${r.length} rekod</div>
       <div class="dashGrid">
         <div class="dashCard"><b>${names.length}</b><br><span class="small">Murid</span></div>
         <div class="dashCard"><b>${latest.length?classAvg:avg}%</b><br><span class="small">Purata terkini kelas</span></div>
