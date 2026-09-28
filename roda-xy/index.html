@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b3d91">
+<title>Roda X–Y • Jejak Koordinat Tahun 5</title>
+<style>
+:root{--blue:#0b3d91;--cyan:#13bfe8;--pink:#ef3f70;--green:#1ca64c;--yellow:#ffd84d;--ink:#172033;--bg:#eef8ff;--white:#fff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink);background:linear-gradient(135deg,#eaf8ff,#fff9dd);min-height:100vh}
+button,input{font:inherit}button{cursor:pointer}header{background:linear-gradient(110deg,#082d72,#0b65b7 60%,#12a7d5);color:#fff;padding:18px clamp(16px,4vw,42px);display:flex;align-items:center;justify-content:space-between;gap:18px;box-shadow:0 5px 20px #082d7230;position:sticky;top:0;z-index:20}h1{margin:0;font-size:clamp(28px,4vw,48px);font-weight:950;letter-spacing:.5px}header .badge{background:var(--yellow);color:var(--ink);padding:10px 15px;border-radius:999px;font-weight:900;white-space:nowrap}
+main{max-width:1280px;margin:20px auto;padding:0 16px;display:grid;grid-template-columns:1fr 1.05fr;gap:18px}.card{background:#ffffffeb;border:2px solid #d7edf9;border-radius:24px;padding:20px;box-shadow:0 10px 30px #124a7a18}.card h2{margin:0 0 14px;font-size:24px}.sub{margin:-5px 0 14px;color:#4b5a70;font-weight:650}
+.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.field label{display:block;font-weight:850;font-size:13px;margin-bottom:5px}.field input{width:100%;padding:11px;border:2px solid #b9d9ed;border-radius:12px;font-size:20px;text-align:center;background:#fff}.field input:focus{outline:4px solid #13bfe830;border-color:var(--cyan)}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}.btn{border:0;border-radius:13px;padding:12px 15px;font-weight:900;font-size:16px;box-shadow:0 3px 8px #00000012}.btn.x{background:#ffd7e0;color:#9d1238}.btn.y{background:#d8f6df;color:#12682c}.btn.random{background:#fff0a9;color:#5f4b00}.btn.reset{background:#e8eef5}.btn:active{transform:translateY(1px)}
+.mode{display:flex;gap:8px;margin-top:14px}.mode button{flex:1;border:2px solid #d7e6f0;background:#f7fbfe;border-radius:12px;padding:10px;font-weight:900}.mode button.active.xm{background:#ffe1e8;border-color:var(--pink);color:#9d1238}.mode button.active.ym{background:#def7e4;border-color:var(--green);color:#12682c}
+.status{min-height:28px;margin:11px 0 0;font-weight:800}.status.ok{color:#12682c}.status.warn{color:#9d1238}
+.wheelPanel{display:flex;justify-content:center;align-items:center;padding:8px 0 2px}.wheel{width:min(470px,82vw);aspect-ratio:1;border-radius:50%;border:14px solid var(--blue);position:relative;overflow:hidden;box-shadow:0 16px 36px #00000022;background:conic-gradient(#ffdfe7 0 25%,#fff0b7 25% 50%,#dff1ff 50% 75%,#dcf8df 75% 100%);transition:transform 900ms cubic-bezier(.17,.67,.22,1.18)}.wheel:before,.wheel:after{content:"";position:absolute;background:#1a2333;z-index:1}.wheel:before{width:4px;height:100%;left:calc(50% - 2px);top:0}.wheel:after{height:4px;width:100%;left:0;top:calc(50% - 2px)}.q{position:absolute;width:50%;height:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:950;font-size:clamp(14px,2vw,19px);padding:16px;line-height:1.15;z-index:2}.q1{left:0;top:0}.q2{right:0;top:0}.q3{right:0;bottom:0}.q4{left:0;bottom:0}.hub{position:absolute;z-index:5;left:50%;top:50%;transform:translate(-50%,-50%);width:126px;height:126px;border-radius:50%;background:var(--blue);color:#fff;border:7px solid #fff;display:flex;align-items:center;justify-content:center;text-align:center;font-size:27px;font-weight:950;box-shadow:0 7px 16px #0003}.pointer{position:absolute;z-index:10;top:-5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-top:35px solid #172033}
+.steps{display:grid;gap:9px;margin-top:5px}.step{display:flex;gap:11px;align-items:flex-start;padding:11px;border-radius:14px;background:#f7fbff;border-left:6px solid var(--blue)}.num{min-width:34px;height:34px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:950}.step b{display:block;margin-bottom:2px}.formula{font-size:20px;font-weight:950;margin-top:3px}.answer{margin-top:12px;padding:15px;border-radius:16px;background:linear-gradient(135deg,#fff7b8,#e9fbff);border:2px dashed #e0b600}.answer .big{font-size:28px;font-weight:950}.answer .small{margin-top:4px;font-weight:800;color:#46566a}
+.quiz{margin-top:15px;padding:15px;border-radius:17px;background:#f3f8ff;border:2px solid #d6e9f6}.quizTop{display:flex;justify-content:space-between;align-items:center;gap:8px}.score{font-weight:950;color:var(--blue)}.quizQ{font-size:19px;font-weight:850;margin:10px 0}.quizOptions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.opt{border:2px solid #c8ddea;background:#fff;border-radius:11px;padding:10px;font-weight:900}.opt.correct{background:#d9f6e0;border-color:#1ca64c}.opt.wrong{background:#ffe0e7;border-color:#ef3f70}.hint{margin-top:8px;color:#53657a;font-weight:700;font-size:14px}
+footer{max-width:1280px;margin:0 auto 20px;padding:0 16px}.memory{background:#0b3d91;color:#fff;border-radius:18px;padding:14px;text-align:center;font-size:18px;font-weight:900}.memory .xx{color:#ff7193}.memory .yy{color:#72e78c}.copyright{text-align:center;color:#66758a;font-size:13px;margin-top:9px}
+@media(max-width:920px){main{grid-template-columns:1fr}.controls{grid-template-columns:repeat(2,1fr)}header{position:static;flex-wrap:wrap}.wheel{width:min(440px,90vw)}}@media(max-width:480px){.controls{grid-template-columns:1fr 1fr}.btn{flex:1}.quizOptions{grid-template-columns:1fr}.hub{width:108px;height:108px;font-size:23px}}
+</style>
+</head>
+<body>
+<header><h1>🎯 RODA X–Y</h1><div class="badge">JEJAK KOORDINAT • TAHUN 5</div></header>
+<main>
+<section class="card">
+<h2>📍 Masukkan Dua Titik</h2><p class="sub">Gunakan koordinat dalam julat 0 hingga 10.</p>
+<div class="controls">
+<div class="field"><label for="x1">A — x₁</label><input id="x1" type="number" min="0" max="10" value="2"></div>
+<div class="field"><label for="y1">A — y₁</label><input id="y1" type="number" min="0" max="10" value="5"></div>
+<div class="field"><label for="x2">B — x₂</label><input id="x2" type="number" min="0" max="10" value="7"></div>
+<div class="field"><label for="y2">B — y₂</label><input id="y2" type="number" min="0" max="10" value="5"></div>
+</div>
+<div class="actions"><button class="btn x" onclick="spin('x')">🔴 Pusing Roda X</button><button class="btn y" onclick="spin('y')">🟢 Pusing Roda Y</button><button class="btn random" onclick="randomPair()">🎲 Cabaran Rawak</button><button class="btn reset" onclick="resetApp()">↺ Set Semula</button></div>
+<div class="mode"><button id="mx" class="active xm" onclick="setMode('x')">X • Mengufuk</button><button id="my" onclick="setMode('y')">Y • Mencancang</button></div>
+<div id="status" class="status"></div>
+<div class="quiz"><div class="quizTop"><b>⚡ Uji Cepat</b><span class="score">Skor: <span id="score">0</span></span></div><div id="quizQ" class="quizQ">Klik “Cabaran Rawak” untuk bermula.</div><div id="quizOptions" class="quizOptions"></div><div id="hint" class="hint"></div></div>
+</section>
+<section class="card">
+<h2 id="wheelTitle">🔴 Roda X — Jarak Mengufuk</h2>
+<div class="wheelPanel"><div id="wheel" class="wheel"><div class="pointer"></div><div class="q q1">①<br>CARI<br>NILAI-X<br>TITIK A</div><div class="q q2">②<br>CARI<br>NILAI-X<br>TITIK B</div><div class="q q3">③<br>CARI BEZA<br>NILAI-X<br><span>|x₂ − x₁|</span></div><div class="q q4">④<br>TENTUKAN<br>JARAK<br>____ unit</div><div id="hub" class="hub">RODA<br>X<br>↔</div></div></div>
+<div id="steps" class="steps"></div><div id="answer" class="answer"></div>
+</section>
+</main>
+<footer><div class="memory"><span class="xx">X</span> → MENGUFUK → KIRI / KANAN &nbsp; • &nbsp; <span class="yy">Y</span> → MENCANCANG → ATAS / BAWAH</div><div class="copyright">BBM Digital Matematik Tahun 5 • Jejak Koordinat</div></footer>
+<script>
+const $=id=>document.getElementById(id);let angle=0,mode='x',score=0,quiz=null;
+function vals(){return ['x1','y1','x2','y2'].map(id=>Number($(id).value));}
+function valid(){const v=vals();return v.every(n=>Number.isFinite(n)&&n>=0&&n<=10)}
+function setMode(m){mode=m;$('mx').className=m==='x'?'active xm':'';$('my').className=m==='y'?'active ym':'';updateWheel();render();}
+function updateWheel(){const x=mode==='x';$('wheelTitle').textContent=x?'🔴 Roda X — Jarak Mengufuk':'🟢 Roda Y — Jarak Mencancang';$('hub').innerHTML=x?'RODA<br>X<br>↔':'RODA<br>Y<br>↕';$('wheel').style.borderColor=x?'#0b3d91':'#16843d'}
+function spin(m=mode){if(!valid()){setStatus('Sila masukkan semua koordinat antara 0 hingga 10.','warn');return}setMode(m);angle+=720+Math.floor(Math.random()*360);$('wheel').style.transform=`rotate(${angle}deg)`;setTimeout(render,350);setStatus(m==='x'?'Roda X: fokus pada nilai-x.':'Roda Y: fokus pada nilai-y.','ok')}
+function render(){if(!valid())return;const [x1,y1,x2,y2]=vals();const a=mode==='x'?x1:y1,b=mode==='x'?x2:y2,d=Math.abs(b-a),axis=mode.toUpperCase(),label=mode==='x'?'mengufuk':'mencancang';const coordA=`(${x1}, ${y1})`,coordB=`(${x2}, ${y2})`;
+$('steps').innerHTML=`<div class="step"><span class="num">1</span><div><b>Cari nilai-${axis} titik A</b>${coordA} → nilai-${axis} = <strong>${a}</strong></div></div><div class="step"><span class="num">2</span><div><b>Cari nilai-${axis} titik B</b>${coordB} → nilai-${axis} = <strong>${b}</strong></div></div><div class="step"><span class="num">3</span><div><b>Cari beza nilai-${axis}</b><div class="formula">|${b} − ${a}| = ${d}</div></div></div><div class="step"><span class="num">4</span><div><b>Tentukan jarak ${label}</b>Jawapan = <strong>${d} unit</strong></div></div>`;
+$('answer').innerHTML=`<div class="tag" style="background:${mode==='x'?'#ffd7e0':'#d8f6df'}">${axis} • ${label.toUpperCase()}</div><div class="big">${d} unit</div><div class="small">${mode==='x'?'Beza nilai-x':'Beza nilai-y'} = |${b} − ${a}| = ${d}</div>`;
+}
+function setStatus(t,c=''){const e=$('status');e.textContent=t;e.className='status '+c}
+function randomPair(){let a,b;do{a=[Math.floor(Math.random()*10),Math.floor(Math.random()*10)];b=[Math.floor(Math.random()*10),Math.floor(Math.random()*10)]}while(a[0]===b[0]&&a[1]===b[1]);$('x1').value=a[0];$('y1').value=a[1];$('x2').value=b[0];$('y2').value=b[1];mode=Math.random()<.5?'x':'y';setMode(mode);spin(mode);makeQuiz();}
+function makeQuiz(){if(!valid())return;const [x1,y1,x2,y2]=vals();const axis=Math.random()<.5?'x':'y';const ans=axis==='x'?Math.abs(x2-x1):Math.abs(y2-y1);quiz={ans,axis};const wrong1=Math.max(0,ans-1),wrong2=ans+1,wrong3=Math.abs((axis==='x'?y2-y1:x2-x1));let opts=[ans,wrong1,wrong2,wrong3];opts=[...new Set(opts)];while(opts.length<4)opts.push(opts.length+2);opts.sort(()=>Math.random()-.5);$('quizQ').textContent=`A = (${x1}, ${y1}) dan B = (${x2}, ${y2}). Berapakah jarak ${axis==='x'?'mengufuk':'mencancang'}?`;$('quizOptions').innerHTML=opts.map(o=>`<button class="opt" onclick="checkQuiz(this,${o})">${o} unit</button>`).join('');$('hint').textContent=`Petunjuk: ${axis.toUpperCase()} menggunakan nilai-${axis}.`}
+function checkQuiz(btn,v){if(!quiz)return;if(v===quiz.ans){btn.classList.add('correct');score++;$('score').textContent=score;$('hint').textContent='Betul! Hebat. Cuba cabaran seterusnya 🎉'}else{btn.classList.add('wrong');$('hint').textContent=`Belum tepat. Cari beza nilai-${quiz.axis}: |nilai B − nilai A|.`}}
+function resetApp(){['x1','y1','x2','y2'].forEach((id,i)=>$(id).value=[2,5,7,5][i]);angle=0;$('wheel').style.transform='rotate(0deg)';score=0;$('score').textContent='0';quiz=null;$('quizQ').textContent='Klik “Cabaran Rawak” untuk bermula.';$('quizOptions').innerHTML='';$('hint').textContent='';setMode('x');setStatus('Sedia untuk belajar!','ok')}
+['x1','y1','x2','y2'].forEach(id=>$(id).addEventListener('input',()=>{if(valid()){render();setStatus('Koordinat dikemas kini.','ok')}else setStatus('Sila gunakan nilai 0 hingga 10.','warn')}));updateWheel();render();setStatus('Sedia untuk belajar!','ok');
+</script>
+</body></html>
