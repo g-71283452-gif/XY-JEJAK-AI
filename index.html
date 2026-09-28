@@ -355,6 +355,73 @@ function adminReset(){
   localStorage.removeItem(DB_KEY);renderAdmin();showLeaderboard();
 }
 
+
+/* ===== X•Y JEJAK AI V3.2 — PROFIL INDIVIDU MURID ===== */
+(function(){
+  const oldRenderAdmin = renderAdmin;
+  function profileBand(p){ return achievementBand(p); }
+  function renderStudentProfile(name){
+    const wrap=document.getElementById("studentProfile");
+    if(!wrap) return;
+    const records=getRecords().filter(x=>(x.name||"Murid").trim().toLowerCase()===name.trim().toLowerCase());
+    if(!records.length){wrap.innerHTML="<p class='adminNote'>Tiada rekod untuk murid ini.</p>";return;}
+    const total=records.length, avg=Math.round(records.reduce((a,x)=>a+x.pct,0)/total);
+    const best=Math.max(...records.map(x=>x.pct));
+    const latest=records[records.length-1];
+    const errors={X1:0,Y1:0,M1:0,B1:0,A1:0,P1:0};
+    records.forEach(x=>Object.keys(errors).forEach(k=>errors[k]+=(x.errors&&x.errors[k])||0));
+    const dominant=Object.entries(errors).sort((a,b)=>b[1]-a[1])[0];
+    const recommendation=dominant&&dominant[1]>0?label(dominant[0]):"Teruskan latihan penyelesaian masalah.";
+    wrap.innerHTML=`
+      <div class="adminGrid">
+        <div class="adminStat"><b>${total}</b><br><span class="small">Percubaan</span></div>
+        <div class="adminStat"><b>${best}%</b><br><span class="small">Skor tertinggi</span></div>
+        <div class="adminStat"><b>${avg}%</b><br><span class="small">Purata pencapaian</span></div>
+        <div class="adminStat"><b>${profileBand(latest.pct)}</b><br><span class="small">Pencapaian terkini</span></div>
+      </div>
+      <div class="problemBox"><b>🎯 Fokus intervensi:</b> ${escapeHtml(recommendation)}</div>
+      <h4>📈 Sejarah Percubaan</h4>
+      <div class="tableWrap"><table class="leaderTable">
+      <tr><th>#</th><th>Tarikh</th><th>Mod</th><th>Skor</th><th>Pencapaian</th><th>Fokus</th></tr>
+      ${records.slice().reverse().map((x,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(x.date)}</td><td>${escapeHtml(x.mode)}</td><td>${x.score}</td><td>${x.pct}% — <b>${profileBand(x.pct)}</b></td><td>${escapeHtml(x.focus)}</td></tr>`).join("")}
+      </table></div>
+      <h4>🔎 Pola Kesalahan</h4>
+      ${Object.entries(errors).map(([k,v])=>`<div style="margin:7px 0"><b>${k} — ${label(k)}</b><span style="float:right">${v}</span><div class="analysisBar"><span style="width:${Math.min(100,v*10)}%"></span></div></div>`).join("")}
+      <div class="feedback ai"><b>🤖 Cadangan intervensi:</b> ${escapeHtml(recommendation)}. Guru boleh menetapkan murid kepada <b>Latihan Pemulihan AI</b> dan menggunakan XY Slider fizikal untuk pengukuhan.</div>
+    `;
+  }
+  function addProfile(){
+    const box=document.getElementById("adminPanel");
+    if(!box || document.getElementById("studentProfileCard")) return;
+    const records=getRecords();
+    const names=[...new Set(records.map(x=>(x.name||"Murid").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"ms"));
+    const card=document.createElement("div");
+    card.id="studentProfileCard";
+    card.className="card";
+    card.innerHTML=`
+      <h3>👤 Profil Individu Murid</h3>
+      <p class="adminNote">Lihat perkembangan, pencapaian dan pola kesalahan seorang murid berdasarkan rekod pada peranti ini.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input id="profileNameInput" list="profileNames" placeholder="Taip nama murid..." style="min-width:240px">
+        <datalist id="profileNames">${names.map(n=>`<option value="${escapeHtml(n)}">`).join("")}</datalist>
+        <button class="primary" id="profileViewBtn">LIHAT PROFIL</button>
+      </div>
+      <div id="studentProfile" style="margin-top:12px"></div>
+    `;
+    box.appendChild(card);
+    document.getElementById("profileViewBtn").onclick=()=>{
+      const n=document.getElementById("profileNameInput").value.trim();
+      if(!n){alert("Sila masukkan atau pilih nama murid.");return;}
+      renderStudentProfile(n);
+    };
+  }
+  renderAdmin=function(){
+    oldRenderAdmin();
+    addProfile();
+  };
+  window.renderStudentProfile=renderStudentProfile;
+})();
+
 </script>
 </body>
 </html>
