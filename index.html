@@ -269,6 +269,7 @@ function modeName(){
   const v=$("mode").value;
   return v==="problem"?"Penyelesaian Masalah":v==="remedial"?"Latihan Pemulihan AI":"Misi Lengkap";
 }
+function achievementBand(pct){if(pct>=80)return "Cemerlang";if(pct>=60)return "Baik";if(pct>=40)return "Memuaskan";return "Perlu Bimbingan";}
 function saveResult(){
   const records=getRecords();
   const topErr=Object.entries(s.err).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1])[0];
@@ -306,7 +307,7 @@ function renderAdmin(){
   const box=$("adminPanel");box.classList.remove("hide");
   const r=getRecords();
   const total=r.length,avg=total?Math.round(r.reduce((a,x)=>a+x.pct,0)/total):0;
-  const correct=r.reduce((a,x)=>a+x.correct,0),attempts=r.reduce((a,x)=>a+x.attempts,0);
+  const correct=r.reduce((a,x)=>a+x.correct,0),attempts=r.reduce((a,x)=>a+x.attempts,0); const bands={"Cemerlang":0,"Baik":0,"Memuaskan":0,"Perlu Bimbingan":0}; r.forEach(x=>bands[achievementBand(x.pct)]++);
   const errors={X1:0,Y1:0,M1:0,B1:0,A1:0,P1:0};
   r.forEach(x=>Object.keys(errors).forEach(k=>errors[k]+=x.errors?.[k]||0));
   const maxErr=Math.max(1,...Object.values(errors));
@@ -320,9 +321,10 @@ function renderAdmin(){
   </div>
   <h3>📊 Analisis Kesalahan Murid</h3>
   ${Object.keys(errors).map(k=>`<div style="margin:9px 0"><b>${k} — ${labels[k]}</b><span style="float:right">${errors[k]}</span><div class="analysisBar"><span style="width:${Math.round(errors[k]/maxErr*100)}%"></span></div></div>`).join("")}
+  <h3>🎯 Taburan Pencapaian</h3><div class="card" style="padding:12px"><b>Cemerlang</b> ${bands["Cemerlang"]} &nbsp; | &nbsp; <b>Baik</b> ${bands["Baik"]} &nbsp; | &nbsp; <b>Memuaskan</b> ${bands["Memuaskan"]} &nbsp; | &nbsp; <b>Perlu Bimbingan</b> ${bands["Perlu Bimbingan"]}</div>
   <h3>📋 Rekod Murid</h3>
-  <div class="tableWrap"><table class="leaderTable"><tr><th>Nama</th><th>Skor</th><th>%</th><th>Mod</th><th>Fokus</th><th>Tarikh</th></tr>
-  ${r.slice().reverse().map(x=>`<tr><td>${escapeHtml(x.name)}</td><td>${x.score}</td><td>${x.pct}%</td><td>${x.mode}</td><td>${escapeHtml(x.focus)}</td><td>${x.date}</td></tr>`).join("")}
+  <div class="tableWrap"><table class="leaderTable"><tr><th>Nama</th><th>Skor</th><th>%</th><th>Pencapaian</th><th>Mod</th><th>Fokus</th><th>Tarikh</th></tr>
+  ${r.slice().reverse().map(x=>`<tr><td>${escapeHtml(x.name)}</td><td>${x.score}</td><td>${x.pct}%</td><td><b>${achievementBand(x.pct)}</b></td><td>${x.mode}</td><td>${escapeHtml(x.focus)}</td><td>${x.date}</td></tr>`).join("")}
   </table></div>
   <div style="margin-top:12px">
     <button class="primary" onclick="exportData()">⬇️ EKSPORT DATA</button>
