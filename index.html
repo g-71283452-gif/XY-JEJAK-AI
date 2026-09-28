@@ -405,6 +405,7 @@ function adminReset(){
         <input id="profileNameInput" list="profileNames" placeholder="Taip nama murid..." style="min-width:240px">
         <datalist id="profileNames">${names.map(n=>`<option value="${escapeHtml(n)}">`).join("")}</datalist>
         <button class="primary" id="profileViewBtn">LIHAT PROFIL</button>
+        <button class="success" id="profilePrintBtn">🖨️ CETAK LAPORAN</button>
       </div>
       <div id="studentProfile" style="margin-top:12px"></div>
     `;
@@ -414,12 +415,36 @@ function adminReset(){
       if(!n){alert("Sila masukkan atau pilih nama murid.");return;}
       renderStudentProfile(n);
     };
+    document.getElementById("profilePrintBtn").onclick=printStudentReport;
   }
   renderAdmin=function(){
     oldRenderAdmin();
     addProfile();
   };
   window.renderStudentProfile=renderStudentProfile;
+  function printStudentReport(){
+    const name=document.getElementById("profileNameInput").value.trim();
+    const records=getRecords().filter(x=>(x.name||"Murid").trim().toLowerCase()===name.toLowerCase());
+    if(!records.length){alert("Sila pilih murid yang mempunyai rekod.");return;}
+    const total=records.length,avg=Math.round(records.reduce((a,x)=>a+x.pct,0)/total),best=Math.max(...records.map(x=>x.pct)),latest=records[records.length-1];
+    const errors={X1:0,Y1:0,M1:0,B1:0,A1:0,P1:0};
+    records.forEach(x=>Object.keys(errors).forEach(k=>errors[k]+=(x.errors&&x.errors[k])||0));
+    const dominant=Object.entries(errors).sort((a,b)=>b[1]-a[1])[0];
+    const focus=dominant&&dominant[1]>0?label(dominant[0]):"Tiada kesalahan dominan direkodkan.";
+    const rows=records.slice().reverse().map((x,i)=>"<tr><td>"+(i+1)+"</td><td>"+escapeHtml(x.date)+"</td><td>"+escapeHtml(x.mode)+"</td><td>"+x.score+"</td><td>"+x.pct+"%</td><td>"+escapeHtml(x.focus)+"</td></tr>").join("");
+    const erows=Object.entries(errors).map(([k,v])=>"<tr><td>"+k+"</td><td>"+escapeHtml(label(k))+"</td><td>"+v+"</td></tr>").join("");
+    const area=document.createElement("div");
+    area.id="xyPrintReport";
+    area.innerHTML="<h1>X•Y JEJAK AI</h1><h2>LAPORAN INDIVIDU MURID</h2><p><b>SK Penderas (JHEOA) • Matematik Tahun 5</b></p><p><b>Nama:</b> "+escapeHtml(name)+"</p><hr><p><b>Percubaan:</b> "+total+" &nbsp; <b>Skor tertinggi:</b> "+best+"% &nbsp; <b>Purata:</b> "+avg+"% &nbsp; <b>Terkini:</b> "+profileBand(latest.pct)+"</p><div class='problemBox'><b>Fokus intervensi:</b> "+escapeHtml(focus)+"</div><h3>Sejarah Pencapaian</h3><table class='leaderTable'><tr><th>#</th><th>Tarikh</th><th>Mod</th><th>Skor</th><th>%</th><th>Fokus</th></tr>"+rows+"</table><h3>Analisis Kesalahan</h3><table class='leaderTable'><tr><th>Kod</th><th>Fokus</th><th>Bilangan</th></tr>"+erows+"</table><h3>Cadangan Intervensi</h3><p>"+escapeHtml(focus)+". Gunakan XY Slider fizikal dan <b>Latihan Pemulihan AI</b> untuk pengukuhan.</p><p class='small'>Laporan berdasarkan rekod yang tersimpan pada peranti/pelayar guru.</p>";
+    document.body.appendChild(area);
+    const style=document.createElement("style");
+    style.id="xyPrintStyle";
+    style.textContent="@media print{body>*:not(#xyPrintReport){display:none!important}#xyPrintReport{display:block!important;font-family:Arial,sans-serif;padding:24px;color:#172033}#xyPrintReport h1{font-size:26px}#xyPrintReport table{width:100%;border-collapse:collapse}#xyPrintReport th,#xyPrintReport td{border:1px solid #cbd5e1;padding:7px;font-size:12px;text-align:left}#xyPrintReport th{background:#eff6ff}}@media screen{#xyPrintReport{display:none}}";
+    document.head.appendChild(style);
+    window.print();
+    setTimeout(()=>{area.remove();style.remove();},500);
+  }
+
 })();
 
 </script>
