@@ -42,14 +42,14 @@ canvas{width:100%;max-width:580px;aspect-ratio:1;border:3px solid #172033;border
 <div class="wrap">
 <div class="card">
   <div class="badges">
-    <span class="badge rx">🔴 X = MENGUFUK</span>
-    <span class="badge by">🔵 Y = MENCANCANG</span>
+    <span class="badge rx">🔴 x = MENGUFUK</span>
+    <span class="badge by">🔵 y = MENCANCANG</span>
     <span class="badge go">📍 MULA → AKHIR</span>
     <span class="badge or">🤖 AI COACH ADAPTIF</span>
   </div>
   <p><b>Kaedah X•Y JEJAK:</b> murid <b>tanda</b> titik, <b>jejak</b> X dan Y, <b>cari beza</b>, <b>jawab</b>, kemudian <b>semak</b>.</p>
   <div class="steps">
-    <div class="step">① TANDA</div><div class="step">② JEJAK</div><div class="step">③ BEZA</div><div class="step">④ JAWAP & SEMAK</div>
+    <div class="step">① TANDA</div><div class="step">② JEJAK</div><div class="step">③ BEZA</div><div class="step">④ JAWAB & SEMAK</div>
   </div>
   <div style="margin-top:12px">
     <label><b>Nama murid:</b> <input id="student" placeholder="Masukkan nama"></label>
@@ -150,7 +150,7 @@ const PROBLEMS=[
 {f:6,l:"F6 — Misi Laluan",ctx:"Gunakan empat langkah: Fahami → Fikir → Selesaikan → Semak.",q:"A (1,2) ke B (5,6). Apakah jarak mengufuk dan mencancang?",a:"4 unit dan 4 unit",o:["4 unit dan 3 unit","3 unit dan 4 unit","4 unit dan 4 unit","5 unit dan 6 unit"],e:"P1",A:[1,2],B:[5,6],problem:true},
 {f:6,l:"F6 — Misi Laluan",ctx:"Bandingkan x dahulu, kemudian y.",q:"P (6,4) ke Q (2,1). Pernyataan yang betul ialah…",a:"4 unit ke kiri dan 3 unit ke bawah",o:["4 unit ke kanan dan 3 unit ke atas","4 unit ke kiri dan 3 unit ke bawah","3 unit ke kiri dan 4 unit ke bawah","2 unit ke kiri dan 1 unit ke bawah"],e:"P1",A:[6,4],B:[2,1],problem:true},
 {f:6,l:"F6 — Misi Cari Nilai",ctx:"Jarak L (a,b) ke M (1,8) ialah 2 unit mengufuk dan 3 unit mencancang.",q:"Jika L berada di sebelah kanan dan di bawah M, apakah koordinat L?",a:"(3,5)",o:["(3,11)","(3,5)","(-1,5)","(1,6)"],e:"P1",A:[3,5],B:[1,8],problem:true},
-{f:6,l:"F6 — Misi Semak",ctx:"Cari kesilapan sebelum menerima jawapan.",q:"Mula (2,5), akhir (6,3). Murid menjawab 6 unit mengufuk dan 3 unit mencancang. Apakah pembetulan?",a:"4 unit mengufuk dan 2 unit mencancang",o:["6 unit mengufuk dan 3 unit mencancang","4 unit mengufuk dan 2 unit mencancang","4 unit mencancang dan 2 unit mengufuk","8 unit mengufuk dan 8 unit mencancang"],e:"P1",A:[2,5],B:[6,3],problem:true},
+{f:6,l:"F6 — Misi Semak",ctx:"Cari kesilapan sebelum menerima jawaban.",q:"Mula (2,5), akhir (6,3). Murid menjawab 6 unit mengufuk dan 3 unit mencancang. Apakah pembetulan?",a:"4 unit mengufuk dan 2 unit mencancang",o:["6 unit mengufuk dan 3 unit mencancang","4 unit mengufuk dan 2 unit mencancang","4 unit mencancang dan 2 unit mengufuk","8 unit mengufuk dan 8 unit mencancang"],e:"P1",A:[2,5],B:[6,3],problem:true},
 {f:6,l:"F6 — Misi Cabaran",ctx:"Gabungkan dua jarak untuk menerangkan laluan.",q:"Dari rumah (1,1) ke sekolah (5,4), ayat yang paling tepat ialah…",a:"4 unit mengufuk dan 3 unit mencancang",o:["3 unit mengufuk dan 4 unit mencancang","4 unit mengufuk dan 3 unit mencancang","5 unit mengufuk dan 4 unit mencancang","4 unit mencancang dan 1 unit mengufuk"],e:"P1",A:[1,1],B:[5,4],problem:true}
 ];
 
@@ -187,7 +187,7 @@ function answer(i){
   $("feedback").innerHTML=`<div class="feedback good">✅ Betul! ${explain(q)}</div>`;
   $("ai").textContent="🤖 AI Coach: Tepat. Kamu menggunakan langkah penyelesaian dengan betul.";
  }else{s.streak=0;s.err[q.e]++;s.done=true;
-  $("feedback").innerHTML=`<div class="feedback bad">❌ Belum tepat. Jangan terus meneka. Gunakan TANDA → JEJAK → BEZA → JAWAP.</div>`;
+  $("feedback").innerHTML=`<div class="feedback bad">❌ Belum tepat. Jangan terus meneka. Gunakan TANDA → JEJAK → BEZA → JAWAB.</div>`;
   $("ai").textContent=coach(q.e);}
  document.querySelectorAll(".option").forEach(x=>x.disabled=true);$("next").disabled=false;stats();
 }
@@ -207,7 +207,7 @@ function coach(e){return{
  P1:"Fahami soalan dahulu: apakah lokasi mula, lokasi akhir dan jarak yang diminta?"
 }[e]}
 function aiMessage(){let a=Object.entries(s.err).sort((x,y)=>y[1]-x[1])[0];return a&&a[1]>0?`🤖 AI Coach: Fokus pengukuhan kamu ialah ${label(a[0])}.`: "🤖 AI Coach: Ingat nombor pertama = x (mengufuk), nombor kedua = y (mencancang).";}
-function label(e){return{X1:"nilai x / mengufuk",Y1:"nilai y / mencancang",M1:"titik mula dan titik akhir",B1:"beza jarak",A1:"arah pergerakan",P1:"faham dan merancang penyelesaian masalah"}[e]}
+function label(e){return{X1:"x = mengufuk",Y1:"y = mencancang",M1:"titik mula dan titik akhir",B1:"beza jarak",A1:"arah pergerakan",P1:"faham dan merancang penyelesaian masalah"}[e]}
 function explain(q){
  if(q.A&&q.B){let dx=Math.abs(q.B[0]-q.A[0]),dy=Math.abs(q.B[1]-q.A[1]);return `Nilai x: |${q.B[0]} − ${q.A[0]}| = ${dx}. Nilai y: |${q.B[1]} − ${q.A[1]}| = ${dy}.`;}
  return "Kamu mengenal pasti konsep koordinat dengan betul.";
