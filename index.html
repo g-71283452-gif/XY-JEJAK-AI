@@ -25,6 +25,9 @@ canvas{width:100%;max-width:580px;aspect-ratio:1;border:3px solid #172033;border
 .footer{text-align:center;font-size:12px;color:#64748b;padding:10px 0 20px}.hide{display:none}
 .problemBox{border:2px dashed #93c5fd;background:#eff6ff;padding:12px;border-radius:12px;margin:10px 0}
 @media(max-width:820px){.top{grid-template-columns:1fr}.options{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}.brand{align-items:flex-start}}
+
+.adminGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.adminStat{background:#f8fafc;border-radius:12px;padding:12px;text-align:center}.adminStat b{font-size:24px}.tableWrap{overflow:auto}.leaderTable{width:100%;border-collapse:collapse;font-size:13px}.leaderTable th,.leaderTable td{padding:8px;border-bottom:1px solid #e2e8f0;text-align:left;white-space:nowrap}.leaderTable th{background:#eff6ff}.analysisBar{height:12px;background:#e5e7eb;border-radius:99px;overflow:hidden}.analysisBar span{display:block;height:100%;background:linear-gradient(90deg,#ef4444,#f59e0b,#16a34a)}.adminNote{font-size:12px;color:#64748b}.danger{background:#dc2626;color:#fff}.adminPanel{border-left:6px solid #172033}.hiddenInput{display:none}
+@media(max-width:820px){.adminGrid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -104,6 +107,29 @@ canvas{width:100%;max-width:580px;aspect-ratio:1;border:3px solid #172033;border
 <div class="card"><h2>📚 Misi</h2>
 <p>🟢 F1 Koordinat</p><p>🔵 F2 Jarak dari asalan</p><p>🟡 F3 Jarak dua koordinat</p><p>🟠 F4 Mula & akhir</p><p>🔴 F5 Nilai tidak diketahui</p><p>🟣 F6 Penyelesaian masalah</p></div>
 </aside>
+</div>
+
+
+<div class="card adminPanel">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+    <div>
+      <h2 style="margin:0">🏆 Leaderboard</h2>
+      <div class="adminNote">Pencapaian murid direkod pada peranti ini. Nama dan skor tertinggi dipaparkan secara automatik.</div>
+    </div>
+    <button class="purple" onclick="showLeaderboard()">LIHAT LEADERBOARD</button>
+  </div>
+  <div id="leaderboard" class="hide" style="margin-top:12px"></div>
+</div>
+
+<div class="card adminPanel">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+    <div>
+      <h2 style="margin:0">🔐 Admin / Guru</h2>
+      <div class="adminNote">Analisis kesalahan, pencapaian dan pengurusan rekod murid.</div>
+    </div>
+    <button class="dark" onclick="adminLogin()">BUKA PANEL ADMIN</button>
+  </div>
+  <div id="adminPanel" class="hide" style="margin-top:12px"></div>
 </div>
 
 <div id="result" class="card hide">
@@ -214,6 +240,7 @@ function explain(q){
 }
 function stats(){["score","correct","attempts","streak"].forEach(k=>$(k).textContent=s[k]);for(let k in s.err)$(k).textContent=s.err[k];}
 function finish(){
+ saveResult();
  $("bar").style.width="100%";$("result").classList.remove("hide");
  let pct=Math.round(s.correct/s.list.length*100),top=Object.entries(s.err).sort((a,b)=>b[1]-a[1])[0];
  $("resultText").innerHTML=`<b>${$("student").value||"Murid"}</b> mendapat <b>${s.correct}/${s.list.length}</b> betul (${pct}%) dan <b>${s.score} mata</b>.`;
@@ -230,6 +257,102 @@ function draw(A,B){
  const pt=(P,col,t)=>{if(!P)return;let x=p+P[0]*cell,y=h-p-P[1]*cell;ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,10,0,7);ctx.fill();ctx.strokeStyle="#fff";ctx.lineWidth=3;ctx.stroke();ctx.fillStyle=col;ctx.font="bold 15px Arial";ctx.fillText(t,x+12,y-10)};pt(A,"#ef4444","MULA");pt(B,"#2563eb","AKHIR");
 }
 draw();stats();
+
+const DB_KEY="XYJEJAK_LEADERBOARD_V1";
+const ADMIN_PIN="XY2026";
+
+function getRecords(){
+  try{return JSON.parse(localStorage.getItem(DB_KEY)||"[]")}catch(e){return[]}
+}
+function saveRecords(records){localStorage.setItem(DB_KEY,JSON.stringify(records))}
+function modeName(){
+  const v=$("mode").value;
+  return v==="problem"?"Penyelesaian Masalah":v==="remedial"?"Latihan Pemulihan AI":"Misi Lengkap";
+}
+function saveResult(){
+  const records=getRecords();
+  const topErr=Object.entries(s.err).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1])[0];
+  records.push({
+    id:Date.now(),
+    name:($("student").value||"Murid").trim(),
+    score:s.score,correct:s.correct,total:s.list.length,
+    pct:Math.round(s.correct/s.list.length*100),
+    attempts:s.attempts,mode:modeName(),
+    date:new Date().toLocaleString("ms-MY"),
+    errors:{...s.err},
+    focus:topErr?label(topErr[0]):"Tiada kesalahan direkod"
+  });
+  records.sort((a,b)=>b.score-a.score || b.pct-a.pct);
+  saveRecords(records.slice(0,100));
+}
+function showLeaderboard(){
+  const box=$("leaderboard");box.classList.toggle("hide");
+  if(box.classList.contains("hide"))return;
+  const r=getRecords().sort((a,b)=>b.score-a.score || b.pct-a.pct).slice(0,10);
+  if(!r.length){box.innerHTML="<p>Belum ada rekod pencapaian.</p>";return}
+  box.innerHTML=`<div class="tableWrap"><table class="leaderTable">
+  <tr><th>#</th><th>Nama</th><th>Skor</th><th>Betul</th><th>Pencapaian</th><th>Mod</th></tr>
+  ${r.map((x,i)=>`<tr><td><b>${i+1}</b></td><td>${escapeHtml(x.name)}</td><td><b>${x.score}</b></td><td>${x.correct}/${x.total}</td><td>${x.pct}%</td><td>${x.mode}</td></tr>`).join("")}
+  </table></div>`;
+}
+function escapeHtml(v){return String(v).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function adminLogin(){
+  const pin=prompt("Masukkan PIN Admin:");
+  if(pin===null)return;
+  if(pin!==ADMIN_PIN){alert("PIN Admin tidak tepat.");return}
+  renderAdmin();
+}
+function renderAdmin(){
+  const box=$("adminPanel");box.classList.remove("hide");
+  const r=getRecords();
+  const total=r.length,avg=total?Math.round(r.reduce((a,x)=>a+x.pct,0)/total):0;
+  const correct=r.reduce((a,x)=>a+x.correct,0),attempts=r.reduce((a,x)=>a+x.attempts,0);
+  const errors={X1:0,Y1:0,M1:0,B1:0,A1:0,P1:0};
+  r.forEach(x=>Object.keys(errors).forEach(k=>errors[k]+=x.errors?.[k]||0));
+  const maxErr=Math.max(1,...Object.values(errors));
+  const labels={X1:"x / mengufuk",Y1:"y / mencancang",M1:"Mula & akhir",B1:"Beza jarak",A1:"Arah",P1:"Penyelesaian masalah"};
+  box.innerHTML=`
+  <div class="adminGrid">
+    <div class="adminStat"><b>${total}</b><br><span class="small">Percubaan direkod</span></div>
+    <div class="adminStat"><b>${avg}%</b><br><span class="small">Purata pencapaian</span></div>
+    <div class="adminStat"><b>${correct}</b><br><span class="small">Jawapan betul</span></div>
+    <div class="adminStat"><b>${attempts}</b><br><span class="small">Jumlah percubaan</span></div>
+  </div>
+  <h3>📊 Analisis Kesalahan Murid</h3>
+  ${Object.keys(errors).map(k=>`<div style="margin:9px 0"><b>${k} — ${labels[k]}</b><span style="float:right">${errors[k]}</span><div class="analysisBar"><span style="width:${Math.round(errors[k]/maxErr*100)}%"></span></div></div>`).join("")}
+  <h3>📋 Rekod Murid</h3>
+  <div class="tableWrap"><table class="leaderTable"><tr><th>Nama</th><th>Skor</th><th>%</th><th>Mod</th><th>Fokus</th><th>Tarikh</th></tr>
+  ${r.slice().reverse().map(x=>`<tr><td>${escapeHtml(x.name)}</td><td>${x.score}</td><td>${x.pct}%</td><td>${x.mode}</td><td>${escapeHtml(x.focus)}</td><td>${x.date}</td></tr>`).join("")}
+  </table></div>
+  <div style="margin-top:12px">
+    <button class="primary" onclick="exportData()">⬇️ EKSPORT DATA</button>
+    <button class="light" onclick="document.getElementById('importFile').click()">⬆️ IMPORT DATA</button>
+    <button class="danger" onclick="adminReset()">🗑️ RESET SEMUA DATA</button>
+    <input id="importFile" class="hiddenInput" type="file" accept=".json" onchange="importData(event)">
+  </div>
+  <p class="adminNote">Nota: Oleh sebab game ini menggunakan GitHub Pages tanpa pangkalan data, rekod leaderboard disimpan dalam <b>browser/peranti yang digunakan</b>. Untuk menggabungkan data daripada beberapa peranti, gunakan Eksport Data dan Import Data pada peranti guru.</p>`;
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify(getRecords(),null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="XY-JEJAK-data-murid.json";a.click();URL.revokeObjectURL(a.href);
+}
+function importData(e){
+  const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{try{
+    const incoming=JSON.parse(rd.result);if(!Array.isArray(incoming))throw 0;
+    const merged=[...getRecords(),...incoming];
+    const unique=[...new Map(merged.map(x=>[x.id,x])).values()].sort((a,b)=>b.score-a.score);
+    saveRecords(unique.slice(0,100));renderAdmin();showLeaderboard();
+    alert("Data berjaya digabungkan.");
+  }catch(err){alert("Fail data tidak sah.");}};
+  rd.readAsText(f);
+}
+function adminReset(){
+  if(!confirm("Reset SEMUA rekod leaderboard dan analisis murid pada peranti ini? Tindakan ini tidak boleh dibuat asal."))return;
+  localStorage.removeItem(DB_KEY);renderAdmin();showLeaderboard();
+}
+
 </script>
 </body>
 </html>
