@@ -1,0 +1,40 @@
+name: Deploy Roda X-Y to GitHub Pages
+on:
+  push:
+    branches: [main]
+    paths:
+      - "roda-xy/**"
+      - ".github/workflows/pages-roda-xy.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Prepare site
+        run: |
+          mkdir -p _site
+          cp roda-xy/index.html _site/index.html
+          cat > _site/404.html <<'EOF'
+          <!doctype html><html lang="ms"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Roda X-Y</title><meta http-equiv="refresh" content="0;url=./"><p>Membuka Roda X-Y…</p></html>
+          EOF
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
